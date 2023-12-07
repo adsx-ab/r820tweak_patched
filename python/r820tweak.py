@@ -162,12 +162,6 @@ class MyPanel(wx.Panel):
 
         print("Found {} device(s)".format(len(self.device_list)))
 
-        #if len(self.device_list) == 0:
-        #    self.device_list = ["Default"]
-        #    self.device_nodes = [0,]
-
-
-
         wx.Panel.__init__(self, parent, id)
         self.SetBackgroundColour("white")
         
@@ -232,10 +226,10 @@ class MyPanel(wx.Panel):
         step = 28
         ypos = 45
         x00 = 210
-        x0 = x00 + 20
+        x0 = x00 + 40
         x1 = x0 + 55
-        x2 = x1 + 55
-        x3 = x2 + 22
+        x2 = x1 + 75
+        x3 = x2 + 42
         self.BID  = 13350
         self.BIDR = 14350
         self.BIDW = 15350
@@ -253,22 +247,22 @@ class MyPanel(wx.Panel):
             self.re[i][1].SetValue('0x0')
             self.re[i][0].SetFont(font)
             self.re[i][1].SetFont(font)
-            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(20,20), label="r")); bidr += 1;
+            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="r")); bidr += 1;
             self.bur[i].SetFont(font1)
             self.bur[i].SetBackgroundColour("green")
             self.bur[i].SetForegroundColour("white")
             self.bur[i].Bind(wx.EVT_BUTTON, self.onButtonbitsr)
-            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(20,20), label="w")); bidw += 1;
+            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="w")); bidw += 1;
             self.buw[i].SetFont(font1)
             self.buw[i].SetBackgroundColour("red")
             self.buw[i].SetForegroundColour("white")
             self.buw[i].Bind(wx.EVT_BUTTON, self.onButtonbitsw)
 
-        x00 = 410
+        x00 = 510
         x0 = x00 + 20
-        x1 = x0 + 55
+        x1 = x0 + 75
         x2 = x1 + 55
-        x3 = x2 + 22
+        x3 = x2 + 42
         j = 0
         for i in range(16, 32):
             y = ypos + j * step
@@ -280,12 +274,12 @@ class MyPanel(wx.Panel):
             self.re[i][1].SetValue('0x0')
             self.re[i][0].SetFont(font)
             self.re[i][1].SetFont(font)
-            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(20,20), label="r")); bidr += 1;
+            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="r")); bidr += 1;
             self.bur[i].SetFont(font1)
             self.bur[i].SetBackgroundColour("green")
             self.bur[i].SetForegroundColour("white")
             self.bur[i].Bind(wx.EVT_BUTTON, self.onButtonbitsr)
-            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(20,20), label="w")); bidw += 1;
+            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="w")); bidw += 1;
             self.buw[i].SetFont(font1)
             self.buw[i].SetBackgroundColour("red")
             self.buw[i].SetForegroundColour("white")
@@ -457,7 +451,7 @@ class MyPanel(wx.Panel):
         data = self.getReg(rr)
         da = "{0:0>8b}".format(data)
         dah = "0x" + "{0:0>2x}".format(data)
-        print( "Got from reg " + rr + " " + data + dah + da + "\n")
+        print( "Got from reg " + rr + " " + str(data) + dah + da)
         self.re[id][1].SetValue(dah)
         
 
@@ -474,7 +468,7 @@ class MyPanel(wx.Panel):
         data = self.getReg(rr)
         da = "{0:0>8b}".format(data)
         dah = "0x" + "{0:0>2x}".format(data)
-        print("Got from reg " + rr + " " + data + dah + da + "\n")
+        print("Got from reg " + rr + " " + str(data) + dah + da)
         self.re[id][1].SetValue(dah)
 
     def setEntry(self, rr):
@@ -541,7 +535,7 @@ def main():
             return
 
     app = wx.App()
-    frame = wx.Frame(None, -1, "r820tweak", size = (620, 550))
+    frame = wx.Frame(None, -1, "r820tweak", size = (920, 650))
     MyPanel(frame,-1)
     frame.Show(True)
     app.MainLoop()
