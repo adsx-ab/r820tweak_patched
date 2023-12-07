@@ -1991,7 +1991,7 @@ void * srv_server(void *dev)
         exit(1);
     }
 
-    sprintf(sock_path,"/var/tmp/rtlsdr%d",num);
+    sprintf(sock_path,"/tmp/rtlsdr%d",num);
     local.sun_family = AF_UNIX;
     strcpy(local.sun_path, sock_path);
     unlink(local.sun_path);
@@ -2000,22 +2000,25 @@ void * srv_server(void *dev)
     if (bind(s, (struct sockaddr *)&local, len) == -1) 
     {
         perror("bind");
+		fprintf(stderr, "perror(\"bind\")\n");
         return NULL;
     }
 
     if (listen(s, 5) == -1) {
         perror("listen");
+		fprintf(stderr, "perror(\"listen\")\n");
         return NULL;
     }
 
 
-    printf("%d\n",dev_i->handled);
+    printf("dev_i->handled: %d\n",dev_i->handled);
     while (dev_i->handled) 
     {
         int done, n;
         t = sizeof(remote);
         if ((s2 = accept(s, (struct sockaddr *)&remote, (socklen_t *)&t)) == -1) {
             perror("accept");
+			fprintf(stderr, "perror(\"accept\")\n");            
             return NULL;
         }
 
@@ -2030,10 +2033,11 @@ void * srv_server(void *dev)
             }
             if (parse(str, dev_i, s2)<0)
             done = 1;
-//            fprintf(stderr, "Got str %s\n", str);
+            fprintf(stderr, "Got str %s\n", str);
         }
         close(s2);
     }
+	fprintf(stderr, "srv_server returning...\n");
     return NULL;
 }
 
@@ -2051,7 +2055,9 @@ int rtlsdr_open(rtlsdr_dev_t **out_dev, uint32_t index)
 	struct libusb_device_descriptor dd;
 	uint8_t reg;
 	ssize_t cnt;
-        pthread_t srv_thread;
+    pthread_t srv_thread;
+
+    fprintf(stderr, "%s\n", "Trying to open device...");
 
 
 	#ifdef _ENABLE_RPC

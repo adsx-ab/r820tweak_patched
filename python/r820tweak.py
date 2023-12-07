@@ -18,96 +18,95 @@ ALL_REGS = range(0,32)
 
 def get_lna_gain(sock):
     message = "g 5\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     message = "s 6 "+str(1<<6)+" "+str(1<<6)+"\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data2 = sock.recv(32)
     return int(data[2:])&15
 
 def get_mix_gain(sock):
     message = "g 7\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return int(data[2:])&15
 
 def get_vga_gain(sock):
     message = "g 12\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return int(data[2:])&15
 
 def get_hpf(sock):
     message = "g 27\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return 15-(int(data[2:])&15)
 
 def set_hpf(sock,width):
     message = "s 27 "+str(15-width)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
 
 def get_lpnf(sock):
     message = "g 27\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return 15-(int(data[2:])&(15>>4))
 
 def set_lpnf(sock,width):
     message = "s 27 "+str((15-width)<<4)+" "+str(15<<4)+"\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
-
 
 def get_lpf(sock):
     message = "g 11\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return (int(data[2:])&15)
 
 def set_lpf(sock,width):
     message = "s 11 "+str(width)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
 
 def get_filt(sock):
     message = "g 10\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     return 15-(int(data[2:])&15)
 
 def set_filt(sock,width):
     message = "s 10 "+str(15-width)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
 
 def set_lna_gain(sock,gain):
-
     message = "s 5 "+str(gain)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
     
-
-
 def set_mix_gain(sock, gain):
     message = "s 7 "+str(gain)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
-
 
 def set_vga_gain(sock, gain):
     message = "s 12 "+str(gain)+" 15\n"
-    sock.sendall(message)
+    sock.sendall(message.encode())
     data = sock.recv(32)
-
-
 
 
 
 class MyPanel(wx.Panel):
 
     def scan_device(self):
+        if self.sock is None:
+            print("self.sock is None")
+            return
+        else:
+            print(self.sock)
+
         self.lna_gain = get_lna_gain(self.sock)
         self.mix_gain = get_mix_gain(self.sock)
         self.vga_gain = get_vga_gain(self.sock)
@@ -128,33 +127,46 @@ class MyPanel(wx.Panel):
 
     def connect(self, dev):
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        server_address = '/var/tmp/rtlsdr' + str(dev)
+        server_address = '/tmp/rtlsdr' + str(dev)
         try:
             self.sock.connect(server_address)
-        except socket.error:
-            print >>sys.stderr
-            #sys.exit(1)
-            # TODO: proper warning
+        except Exception as e:
+            self.sock = None
+            print(f"An error occurred: {e}")        
+        #else:
+        #    print("Unknown error connecting to {}".format(server_address))
 
 
     def scan_devices(self):
         self.device_list = []
         self.device_nodes = []
-        for a in range(16):
+        for a in range(3):
             sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-            server_address = '/var/tmp/rtlsdr' + str(a)
+            server_address = '/tmp/rtlsdr' + str(a)
             try:
+                print("trying to connect to socket: rtlsdr" + str(a))
                 sock.connect(server_address)
             except socket.error:
+                print("socket error...")
                 pass
             else:
+                print("adding to device_list...")                
                 self.device_list.append("R820T2 device: #" + str(a))
                 self.device_nodes.append(a)
+                break
 
 
 
     def __init__(self, parent, id):
         self.scan_devices()
+
+        print("Found {} device(s)".format(len(self.device_list)))
+
+        #if len(self.device_list) == 0:
+        #    self.device_list = ["Default"]
+        #    self.device_nodes = [0,]
+
+
 
         wx.Panel.__init__(self, parent, id)
         self.SetBackgroundColour("white")
@@ -293,7 +305,7 @@ class MyPanel(wx.Panel):
         self.butreset.Bind(wx.EVT_BUTTON, self.resetregs)
         self.butreset.SetFont(font)
 
-        if len(self.device_list):
+        if len(self.device_nodes):
             self.connect(self.device_nodes[0])
             self.scan_device()
 
@@ -339,7 +351,7 @@ class MyPanel(wx.Panel):
         rr = self.regtxt.GetValue()
         message = "g " + str(rr) +"\n"
         print("Call getreg " + message)
-        self.sock.sendall(message)
+        self.sock.sendall(message.encode())
         data = self.sock.recv(32)
         data = int(data[2:])&15
         da = "{0:0>8b}".format(data)
@@ -411,7 +423,7 @@ class MyPanel(wx.Panel):
 
     def getReg(self, rr):
        message = "g " + str(rr) +"\n"
-       self.sock.sendall(message)
+       self.sock.sendall(message.encode())
        data = self.sock.recv(32)
 #       print "Got from socket: ", data
        ret = -1
@@ -431,7 +443,7 @@ class MyPanel(wx.Panel):
           return
        message = "s " + str(rr) + " " + str(bb) + " 255\n"
 #       print "Call setreg ", str(rr) + " " + str(bb)
-       self.sock.sendall(message)
+       self.sock.sendall(message.encode())
        data = self.sock.recv(32)
         
     def onButtonbitsr(self, event):
@@ -528,7 +540,7 @@ def main():
             usage()
             return
 
-    app = wx.PySimpleApp()
+    app = wx.App()
     frame = wx.Frame(None, -1, "r820tweak", size = (620, 550))
     MyPanel(frame,-1)
     frame.Show(True)
