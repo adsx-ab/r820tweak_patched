@@ -338,13 +338,13 @@ class MyPanel(wx.Panel):
     def onButtontxt(self, event):
         rr = self.regtxt.GetValue()
         message = "g " + str(rr) +"\n"
-        print "Call getreg " + message
+        print("Call getreg " + message)
         self.sock.sendall(message)
         data = self.sock.recv(32)
         data = int(data[2:])&15
         da = "{0:0>8b}".format(data)
         dah = "{0:0>2x}".format(data)
-        print data, dah, da
+        print( data + dah + da)
 #        print "{0:b}".format(data)
 #        print "{0:0>8b}".format(data)
 
@@ -364,12 +364,12 @@ class MyPanel(wx.Panel):
                s = "0x" + r + " 0x" + str(dah) +" " + "  " + da + "\n"
                f.write(s)
         f.close()
-        print "Writing to regs.txt done\n"
+        print( "Writing to regs.txt done\n")
 #        print "{0:b}".format(data)
 #        print "{0:0>8b}".format(data)
 
     def readregs(self, event):
-        print "Start reading registers file"
+        print( "Start reading registers file")
         f = open('regs.txt', 'r')
         for rr in range(32):
             s = f.readline()
@@ -386,19 +386,19 @@ class MyPanel(wx.Panel):
                     self.re[r][1].SetValue(dah)
                     self.setReg(str(ss[0]), dah)
         f.close()
-        print "Read from regs.txt done\n"
+        print( "Read from regs.txt done\n")
 #        print "{0:b}".format(data)
 #        print "{0:0>8b}".format(data)
 
     def resetregs(self, event):
-        print "Reset all registers..."
+        print("Reset all registers...")
         for rr in RW_REGS:
             self.setReg(str(rr), 0)
         self.getregs(event)
-        print "Reset done.\n"
+        print( "Reset done.\n")
 
     def getregs(self, event):
-        print "Read all registers from board..."
+        print( "Read all registers from board...")
         for rr in ALL_REGS:
             v = self.getReg(str(rr))
             rz = "0x" + "{0:0>2x}".format(rr)
@@ -406,7 +406,7 @@ class MyPanel(wx.Panel):
             rz = "0x" + "{0:0>2x}".format(v)
 #            print "++++++++++++++", v, "     ", rz
             self.re[int(rr)][1].SetValue(rz)
-        print "Reading done."
+        print( "Reading done.")
 
 
     def getReg(self, rr):
@@ -427,7 +427,7 @@ class MyPanel(wx.Panel):
     def setReg(self, rr, bb):
        r_i = int(rr, 0)
        if r_i in RO_REGS:
-          print "RO register given! No write performed."
+          print( "RO register given! No write performed.")
           return
        message = "s " + str(rr) + " " + str(bb) + " 255\n"
 #       print "Call setreg ", str(rr) + " " + str(bb)
@@ -445,7 +445,7 @@ class MyPanel(wx.Panel):
         data = self.getReg(rr)
         da = "{0:0>8b}".format(data)
         dah = "0x" + "{0:0>2x}".format(data)
-        print "Got from reg ", rr, " ", data, dah, da, "\n"
+        print( "Got from reg " + rr + " " + data + dah + da + "\n")
         self.re[id][1].SetValue(dah)
         
 
@@ -462,7 +462,7 @@ class MyPanel(wx.Panel):
         data = self.getReg(rr)
         da = "{0:0>8b}".format(data)
         dah = "0x" + "{0:0>2x}".format(data)
-        print "Got from reg ", rr, " ", data, dah, da, "\n"
+        print("Got from reg " + rr + " " + data + dah + da + "\n")
         self.re[id][1].SetValue(dah)
 
     def setEntry(self, rr):
@@ -513,10 +513,10 @@ class MyPanel(wx.Panel):
 
 
 def usage():
-    print sys.argv[1],"[program_to_run]"
-    print "\n\n"
-    print "When used without argument, the r820tweak control panel will launch"
-    print "When [program_to_run] is provided, it starts the SDR program with the modified RTLSDR driver"
+    print (sys.argv[1] + "[program_to_run]")
+    print( "\n\n")
+    print( "When used without argument, the r820tweak control panel will launch")
+    print( "When [program_to_run] is provided, it starts the SDR program with the modified RTLSDR driver")
 
 
 def main():
