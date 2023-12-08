@@ -449,10 +449,9 @@ class MyPanel(wx.Panel):
         bb = self.re[id][1].GetValue()
 #        print "Get reg ", rr, " to ", bb
         data = self.getReg(rr)
-        da = "{0:0>8b}".format(data)
-        dah = "0x" + "{0:0>2x}".format(data)
-        print( "Got from reg " + rr + " " + str(data) + dah + da)
-        self.re[id][1].SetValue(dah)
+
+        print(f"Reg {rr}: {data:2d} 0x{data:0>2x} 0b{data:0>8b}")
+        self.re[id][1].SetValue(f"0x{data:0>2x}")
         
 
     def onButtonbitsw(self, event):
@@ -466,17 +465,14 @@ class MyPanel(wx.Panel):
         self.setReg(rr, bb)
 #        time.sleep(2.5)
         data = self.getReg(rr)
-        da = "{0:0>8b}".format(data)
-        dah = "0x" + "{0:0>2x}".format(data)
-        print("Got from reg " + rr + " " + str(data) + dah + da)
-        self.re[id][1].SetValue(dah)
+        print(f"Reg {rr}: {data:2d} 0x{data:0>2x} 0b{data:0>8b}")
+        self.re[id][1].SetValue(f"0x{data:0>2x}")
 
     def setEntry(self, rr):
         r = self.getRegEntry(rr)
         if r > -1:
             v = self.getReg(rr)
-            dah = "0x" + "{0:0>2x}".format(v)
-            self.re[r][1].SetValue(dah)
+            self.re[r][1].SetValue(f"0x{v:0>2x}")
 
     def sliderUpdate(self, event):
         try:
