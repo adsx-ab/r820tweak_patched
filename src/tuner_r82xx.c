@@ -446,6 +446,8 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	pll_ref = priv->cfg->xtal;
 	pll_ref_khz = (priv->cfg->xtal + 500) / 1000;
 
+	printf("freq: %d\n", freq);
+
 	rc = r82xx_write_reg_mask(priv, 0x10, refdiv2, 0x10);
 	if (rc < 0)
 		return rc;
@@ -473,6 +475,8 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 		}
 		mix_div = mix_div << 1;
 	}
+	printf("mix_div: %d\n", mix_div);
+
 
 	rc = r82xx_read(priv, 0x00, data, sizeof(data));
 	if (rc < 0)
@@ -488,6 +492,8 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	else if (vco_fine_tune < vco_power_ref)
 		div_num = div_num + 1;
 
+	printf("vco_fine_tune, div_num: %d  %d\n", vco_fine_tune, div_num);
+	printf("SEL_DIV: %d\n", div_num);
 	rc = r82xx_write_reg_mask(priv, 0x10, div_num << 5, 0xe0);
 	if (rc < 0)
 		return rc;
@@ -504,6 +510,8 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	ni = (nint - 13) / 4;
 	si = nint - 4 * ni - 13;
 
+	printf("SI2C: %d\n", si);
+	printf("NI2C: %d\n", ni);
 	rc = r82xx_write_reg(priv, 0x14, ni + (si << 6));
 	if (rc < 0)
 		return rc;
@@ -514,6 +522,7 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	else
 		val = 0x00;
 
+	printf("PW_SDM: %d\n", val >> 3);
 	rc = r82xx_write_reg_mask(priv, 0x12, val, 0x08);
 	if (rc < 0)
 		return rc;
@@ -529,6 +538,7 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 		n_sdm <<= 1;
 	}
 
+	printf("SDM: %d\n", sdm);
 	rc = r82xx_write_reg(priv, 0x16, sdm >> 8);
 	if (rc < 0)
 		return rc;

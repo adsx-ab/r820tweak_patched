@@ -63,6 +63,7 @@ def get_lpf(sock):
     message = "g 11\n"
     sock.sendall(message.encode())
     data = sock.recv(32)
+    #print(data)
     return (int(data[2:])&15)
 
 def set_lpf(sock,width):
@@ -96,7 +97,13 @@ def set_vga_gain(sock, gain):
     sock.sendall(message.encode())
     data = sock.recv(32)
 
-
+def get_dev_freq(sock):
+    message = "f \n"
+    sock.sendall(message.encode())
+    data = sock.recv(32)
+    f = data[2:]
+    #print(f)
+    return int(f)
 
 class MyPanel(wx.Panel):
 
@@ -165,7 +172,7 @@ class MyPanel(wx.Panel):
         wx.Panel.__init__(self, parent, id)
         self.SetBackgroundColour("white")
         
-        fnt = wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
+        fnt = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
         T = wx.StaticText(self, -1, 'LNA Gain', (10,45))
         T.SetFont(fnt)
         self.slider_gain_lna = wx.Slider(self, -1, 0, 0, 15, (10, 50), (180, 48), wx.SL_HORIZONTAL | wx.SL_AUTOTICKS, name="LNA Gain")
@@ -210,8 +217,8 @@ class MyPanel(wx.Panel):
         self.button.Bind(wx.EVT_BUTTON, self.onButton)
         self.cb.Bind(wx.EVT_COMBOBOX, self.onCBChange)
 
-        font = wx.Font(7, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
-        font1 = wx.Font(5, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
+        font = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
+        font1 = wx.Font(9, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, True)
 #        self.regtxt = wx.TextCtrl(self, -1, pos=(10,270), size=(60, 10))
 #        self.regtxt.SetValue('0x0a')
 #        self.regtxt.SetFont(font)
@@ -242,17 +249,17 @@ class MyPanel(wx.Panel):
             j = j+1
             cheb = wx.CheckBox(self, bid, pos=(x00, y-6)); bid += 1;
             cheb.SetValue(True)
-            self.re.insert(i, [wx.TextCtrl(self, -1, pos=(x0, y), size=(50, 10)), wx.TextCtrl(self, -1, pos=(x1, y), size=(50, 10)), cheb])
+            self.re.insert(i, [wx.TextCtrl(self, -1, pos=(x0, y), size=(50, 14)), wx.TextCtrl(self, -1, pos=(x1, y), size=(50, 14)), cheb])
             self.re[i][0].SetValue('0x0a')
             self.re[i][1].SetValue('0x0')
             self.re[i][0].SetFont(font)
             self.re[i][1].SetFont(font)
-            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="r")); bidr += 1;
+            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="R")); bidr += 1;
             self.bur[i].SetFont(font1)
             self.bur[i].SetBackgroundColour("green")
             self.bur[i].SetForegroundColour("white")
             self.bur[i].Bind(wx.EVT_BUTTON, self.onButtonbitsr)
-            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="w")); bidw += 1;
+            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="W")); bidw += 1;
             self.buw[i].SetFont(font1)
             self.buw[i].SetBackgroundColour("red")
             self.buw[i].SetForegroundColour("white")
@@ -269,17 +276,17 @@ class MyPanel(wx.Panel):
             j = j+1
             cheb = wx.CheckBox(self, bid, pos=(x00, y-6)); bid += 1;
             cheb.SetValue(True)
-            self.re.insert(i, [wx.TextCtrl(self, -1, pos=(x0, y), size=(50, 10)), wx.TextCtrl(self, -1, pos=(x1, y), size=(50, 10)), cheb])
+            self.re.insert(i, [wx.TextCtrl(self, -1, pos=(x0, y), size=(50, 14)), wx.TextCtrl(self, -1, pos=(x1, y), size=(50, 14)), cheb])
             self.re[i][0].SetValue('0x0a')
             self.re[i][1].SetValue('0x0')
             self.re[i][0].SetFont(font)
             self.re[i][1].SetFont(font)
-            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="r")); bidr += 1;
+            self.bur.insert(i, wx.Button(self, id=bidr, pos=(x2, y-5), size=(40,20), label="R")); bidr += 1;
             self.bur[i].SetFont(font1)
             self.bur[i].SetBackgroundColour("green")
             self.bur[i].SetForegroundColour("white")
             self.bur[i].Bind(wx.EVT_BUTTON, self.onButtonbitsr)
-            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="w")); bidw += 1;
+            self.buw.insert(i, wx.Button(self, id=bidw, pos=(x3, y-5), size=(40,20), label="W")); bidw += 1;
             self.buw[i].SetFont(font1)
             self.buw[i].SetBackgroundColour("red")
             self.buw[i].SetForegroundColour("white")
@@ -298,14 +305,23 @@ class MyPanel(wx.Panel):
         self.butreset = wx.Button(self, id=wx.ID_ANY, pos=(510, y + 30), size=(55,25), label="Clear")
         self.butreset.Bind(wx.EVT_BUTTON, self.resetregs)
         self.butreset.SetFont(font)
+        self.butfreq = wx.Button(self, id=wx.ID_ANY, pos=(200, y + 60), size=(66,25), label="Freq")
+        self.butfreq.Bind(wx.EVT_BUTTON, self.freqUpdate)
+        self.butfreq.SetFont(font)        
 
         if len(self.device_nodes):
             self.connect(self.device_nodes[0])
             self.scan_device()
 
         self.Bind(wx.EVT_SLIDER, self.sliderUpdate)
+
+        #frequency textbox
+        self.box = wx.StaticBox(self, wx.ID_ANY, pos=(10, 350), size=(160,180), label="Frequency")
+        self.ftxt = wx.StaticText(self.box, id=wx.ID_ANY, label="SDM:")
+        self.freqregs = ["0x10", "0x14", "0x15", "0x16"]
         # initial set of registers
         self.getregs(0)
+        self.freqUpdate()
 
 
     def onCBChange(self, event):
@@ -428,7 +444,22 @@ class MyPanel(wx.Panel):
 #           print "Got from reg ", rr, " ", data, dah, da, "\n"
            ret = data
        return ret
-    
+
+    def freqUpdate(self, event=wx.EVT_BUTTON):
+        r10 = self.getReg("0x10")
+        refdiv = (r10 >> 4) & 0x01
+        r20 = self.getReg("0x14")
+        sdm = self.getReg("0x15")  + (self.getReg("0x16")<<8)
+        dev_freq = get_dev_freq(self.sock)
+        plldiv = (4*(r20&0x3f) + (r20>>6) + 13 + sdm / 2**17) * 2
+        s =  f"REFDIV: {refdiv:d}\n"
+        s += f"SI2C  : {r20>>6:d}\n"
+        s += f"NI2C  : {r20&0x3f:d}\n"
+        s += f"SDM   : {sdm:d}\n"
+        s += f"NDIV  :{plldiv:f}\n"
+        s += f"Fc    : {plldiv * 28.8 / 4. - 2.3 / 2:f} MHz\n"
+        s += f"dev  : {dev_freq:d}"
+        self.ftxt.SetLabel(s)
            
     def setReg(self, rr, bb):
        r_i = int(rr, 0)
@@ -450,8 +481,10 @@ class MyPanel(wx.Panel):
 #        print "Get reg ", rr, " to ", bb
         data = self.getReg(rr)
 
-        print(f"Reg {rr}: {data:2d} 0x{data:0>2x} 0b{data:0>8b}")
+        print(f"Reg {rr}: {data:03d} 0x{data:0>2x} 0b{data:0>8b}")
         self.re[id][1].SetValue(f"0x{data:0>2x}")
+        if rr in self.freqregs:
+            self.freqUpdate()
         
 
     def onButtonbitsw(self, event):
@@ -465,8 +498,10 @@ class MyPanel(wx.Panel):
         self.setReg(rr, bb)
 #        time.sleep(2.5)
         data = self.getReg(rr)
-        print(f"Reg {rr}: {data:2d} 0x{data:0>2x} 0b{data:0>8b}")
+        print(f"Reg {rr}: {data:03d} 0x{data:0>2x} 0b{data:0>8b}")
         self.re[id][1].SetValue(f"0x{data:0>2x}")
+        if rr in self.freqregs:
+            self.freqUpdate()
 
     def setEntry(self, rr):
         r = self.getRegEntry(rr)

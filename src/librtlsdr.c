@@ -1872,7 +1872,7 @@ int parse(char *message, rtlsdr_dev_t *dev, int fd)
 
     if (comm==2)
     {
-        fprintf(stderr,"Get freq=%d\n", dev->freq);
+        fprintf(stderr,"Get freq = %d\n", dev->freq);
         sprintf(response,"! %d", dev->freq);
         val = send(fd, response, strlen(response), MSG_NOSIGNAL);
         if (val<0)
@@ -1935,9 +1935,9 @@ int parse(char *message, rtlsdr_dev_t *dev, int fd)
 
     if (comm==0)
     {
-    	char bits[9];
+    	//char bits[9];
         val = dev->tuner->get_reg(dev, reg);
-        fprintf(stderr,"Get0 reg 0x%x     bits: %s val: 0x%x  freq=%d\n", reg, get_bits(val, bits), val, dev->freq);
+        fprintf(stderr,"Reg 0x%02x: val: 0x%02x 0b%08b\n", reg, val, val);
         sprintf(response,"! %d",val);
         val = send(fd, response, strlen(response), MSG_NOSIGNAL);
 
@@ -2033,7 +2033,7 @@ void * srv_server(void *dev)
             }
             if (parse(str, dev_i, s2)<0)
             done = 1;
-            fprintf(stderr, "Got str %s\n", str);
+            //fprintf(stderr, "Got str %s\n", str);
         }
         close(s2);
     }
