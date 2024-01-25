@@ -430,6 +430,14 @@ class MyPanel(wx.Panel):
             self.re[int(rr)][1].SetValue(rz)
         print( "Reading done.")
 
+        self.slider_gain_lna.SetValue(get_lna_gain(self.sock))
+        self.slider_gain_mix.SetValue(get_mix_gain(self.sock)) 
+        self.slider_gain_vga.SetValue(get_vga_gain(self.sock))
+        self.slider_lpf.SetValue(get_lpf(self.sock))
+        self.slider_lpnf.SetValue(get_lpnf(self.sock))
+        self.slider_hpf.SetValue(get_hpf(self.sock))
+        self.slider_filt.SetValue(get_filt(self.sock))
+
 
     def getReg(self, rr):
        message = "g " + str(rr) +"\n"
@@ -451,13 +459,13 @@ class MyPanel(wx.Panel):
         r20 = self.getReg("0x14")
         sdm = self.getReg("0x15")  + (self.getReg("0x16")<<8)
         dev_freq = get_dev_freq(self.sock)
-        plldiv = (4*(r20&0x3f) + (r20>>6) + 13 + sdm / 2**17) * 2
+        plldiv = (4*(r20&0x3f) + (r20>>6) + 13 + sdm / 2**16) * 2
         s =  f"REFDIV: {refdiv:d}\n"
         s += f"SI2C  : {r20>>6:d}\n"
         s += f"NI2C  : {r20&0x3f:d}\n"
         s += f"SDM   : {sdm:d}\n"
         s += f"NDIV  :{plldiv:f}\n"
-        s += f"Fc    : {plldiv * 28.8 / 4. - 2.3 / 2:f} MHz\n"
+        s += f"Fc    : {plldiv * 28.8 / 2. - 2.3 :f} MHz\n"
         s += f"dev  : {dev_freq:d}"
         self.ftxt.SetLabel(s)
            

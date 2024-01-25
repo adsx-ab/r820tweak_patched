@@ -446,7 +446,7 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	pll_ref = priv->cfg->xtal;
 	pll_ref_khz = (priv->cfg->xtal + 500) / 1000;
 
-	printf("freq: %d\n", freq);
+	printf("set_pll: freq: %d\n", freq);
 
 	rc = r82xx_write_reg_mask(priv, 0x10, refdiv2, 0x10);
 	if (rc < 0)
@@ -475,10 +475,18 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 		}
 		mix_div = mix_div << 1;
 	}
-	printf("mix_div: %d\n", mix_div);
+	printf("set_pll: mix_div: %d\n", mix_div);
 
 
 	rc = r82xx_read(priv, 0x00, data, sizeof(data));
+	printf("R data: ");
+	for (int i = 0; i < 5; ++i)
+	{
+		printf("%08b ", data[i]);
+		/* code */
+	}
+	printf("\n" );
+
 	if (rc < 0)
 		return rc;
 
@@ -492,8 +500,8 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	else if (vco_fine_tune < vco_power_ref)
 		div_num = div_num + 1;
 
-	printf("vco_fine_tune, div_num: %d  %d\n", vco_fine_tune, div_num);
-	printf("SEL_DIV: %d\n", div_num);
+	printf("set_pll: vco_fine_tune, div_num: %d  %d\n", vco_fine_tune, div_num);
+	printf("set_pll: SEL_DIV: %d\n", div_num);
 	rc = r82xx_write_reg_mask(priv, 0x10, div_num << 5, 0xe0);
 	if (rc < 0)
 		return rc;
@@ -501,7 +509,7 @@ if(f) { fprintf(f,"r82xx_set_pll): pll=%u\n", freq); fclose(f); }
 	vco_freq = (uint64_t)freq * (uint64_t)mix_div;
 	nint = vco_freq / (2 * pll_ref);
 	vco_fra = (vco_freq - 2 * pll_ref * nint) / 1000;
-
+	printf("set_pll: NINT: %d\n", nint);
 	if (nint > ((128 / vco_power_ref) - 1)) {
 		fprintf(stderr, "[R82XX] No valid PLL values for %u Hz!\n", freq); fflush(stderr);
 		return -1;
@@ -1016,9 +1024,11 @@ static int r82xx_read_gain(struct r82xx_priv *priv)
  */
 
 #define VGA_BASE_GAIN	-47
+/*
 static const int r82xx_vga_gain_steps[]  = {
 	0, 26, 26, 30, 42, 35, 24, 13, 14, 32, 36, 34, 35, 37, 35, 36
 };
+*/
 
 static const int r82xx_lna_gain_steps[]  = {
 	0, 9, 13, 40, 38, 13, 31, 22, 26, 31, 26, 14, 19, 5, 35, 13
